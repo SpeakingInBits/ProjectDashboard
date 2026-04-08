@@ -30,8 +30,10 @@ namespace ProjectDashboard
             builder.Services.AddSingleton<GitHubService>();
             builder.Services.AddTransient<DashboardViewModel>();
             builder.Services.AddTransient<SettingsViewModel>();
+            builder.Services.AddTransient<ProjectSettingsViewModel>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<SettingsPage>();
+            builder.Services.AddTransient<ProjectSettingsPage>();
             builder.Services.AddTransient<AppShell>();
 
 #if DEBUG

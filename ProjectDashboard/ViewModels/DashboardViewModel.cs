@@ -198,8 +198,15 @@ public partial class DashboardViewModel : ObservableObject, IRecipient<TokenUpda
         Projects.Remove(card);
     }
 
+    private async Task OpenProjectSettingsAsync(ProjectCardViewModel card)
+    {
+        var page = _serviceProvider.GetRequiredService<ProjectSettingsPage>();
+        page.Initialize(card);
+        await Shell.Current.Navigation.PushModalAsync(new NavigationPage(page));
+    }
+
     private bool CanExecuteCommands() => !IsLoading;
 
     private ProjectCardViewModel CreateCard(GitHubProject project) =>
-        new(project, DeleteProjectAsync);
+        new(project, DeleteProjectAsync, OpenProjectSettingsAsync);
 }
