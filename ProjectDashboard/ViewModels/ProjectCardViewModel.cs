@@ -16,6 +16,8 @@ public partial class ProjectCardViewModel : ObservableObject
 
     public string DisplayName => $"{Project.Owner}/{Project.RepoName}";
 
+    public Color CardAccentColor { get; }
+
     public IAsyncRelayCommand DeleteCommand { get; }
 
     public ProjectCardViewModel(GitHubProject project, Func<ProjectCardViewModel, Task> onDelete)
@@ -24,6 +26,7 @@ public partial class ProjectCardViewModel : ObservableObject
         openIssues = project.OpenIssues;
         SetLastUpdatedText(project.LatestCommitDate);
         DeleteCommand = new AsyncRelayCommand(() => onDelete(this));
+        CardAccentColor = Color.FromArgb(project.CardColor);
     }
 
     public void UpdateData(int issues, DateTime? latestCommit)

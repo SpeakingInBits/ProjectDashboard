@@ -6,12 +6,93 @@
              x:DataType="vm:DashboardViewModel"
              Title="Project Dashboard">
 
-    <Grid RowDefinitions="Auto,Auto,*"
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="⚙ Settings"
+                     Command="{Binding OpenSettingsCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*"
           Padding="24,16,24,24"
           RowSpacing="12">
 
+        <!-- Token Tip Banner -->
+        <Border Grid.Row="0"
+                Background="{AppThemeBinding Light=#FFF8E1, Dark=#2C2500}"
+                Stroke="{AppThemeBinding Light=#FFD54F, Dark=#5C4A00}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 8"
+                IsVisible="{Binding IsTokenBannerVisible}"
+                Padding="14,10">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                  ColumnSpacing="10">
+                <Label Grid.Column="0"
+                       Text="💡"
+                       FontSize="15"
+                       VerticalOptions="Center" />
+                <Label Grid.Column="1"
+                       Text="Add a GitHub token in Settings to raise the API rate limit to 5,000 requests/hour and enable private repositories."
+                       FontSize="12"
+                       VerticalOptions="Center" />
+                <Button Grid.Column="2"
+                        Text="Open Settings"
+                        Command="{Binding OpenSettingsCommand}"
+                        FontSize="11"
+                        HeightRequest="30"
+                        Padding="10,0"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light=#7B5800, Dark=#FFD54F}" />
+                <Button Grid.Column="3"
+                        Text="✕"
+                        Command="{Binding DismissTokenBannerCommand}"
+                        FontSize="12"
+                        HeightRequest="30"
+                        WidthRequest="30"
+                        Padding="0"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light=#7B5800, Dark=#FFD54F}" />
+            </Grid>
+        </Border>
+
+        <!-- Auth Error Banner -->
+        <Border Grid.Row="1"
+                Background="{AppThemeBinding Light=#FFEBEE, Dark=#2C0000}"
+                Stroke="{AppThemeBinding Light=#EF9A9A, Dark=#5C0000}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 8"
+                IsVisible="{Binding IsAuthErrorVisible}"
+                Padding="14,10">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                  ColumnSpacing="10">
+                <Label Grid.Column="0"
+                       Text="⚠️"
+                       FontSize="15"
+                       VerticalOptions="Center" />
+                <Label Grid.Column="1"
+                       Text="Your GitHub token is invalid or has expired. Please update it in Settings."
+                       FontSize="12"
+                       VerticalOptions="Center" />
+                <Button Grid.Column="2"
+                        Text="Update Token"
+                        Command="{Binding OpenSettingsCommand}"
+                        FontSize="11"
+                        HeightRequest="30"
+                        Padding="10,0"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light=#B71C1C, Dark=#EF9A9A}" />
+                <Button Grid.Column="3"
+                        Text="✕"
+                        Command="{Binding DismissAuthErrorCommand}"
+                        FontSize="12"
+                        HeightRequest="30"
+                        WidthRequest="30"
+                        Padding="0"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light=#B71C1C, Dark=#EF9A9A}" />
+            </Grid>
+        </Border>
+
         <!-- Add Project Row -->
-        <Grid Grid.Row="0"
+        <Grid Grid.Row="2"
               ColumnDefinitions="*,Auto,Auto"
               ColumnSpacing="8">
             <Entry Grid.Column="0"
@@ -28,7 +109,7 @@
         </Grid>
 
         <!-- Status Row -->
-        <Grid Grid.Row="1" HeightRequest="24">
+        <Grid Grid.Row="3" HeightRequest="24">
             <Label Text="{Binding ErrorMessage}"
                    TextColor="#E53935"
                    FontSize="13"
@@ -43,7 +124,7 @@
         </Grid>
 
         <!-- Projects Grid -->
-        <CollectionView Grid.Row="2"
+        <CollectionView Grid.Row="4"
                         ItemsSource="{Binding Projects}">
             <CollectionView.EmptyView>
                 <Label Text="No projects added yet. Paste a GitHub URL above and click Add Project."
@@ -65,24 +146,29 @@
                             Background="{AppThemeBinding Light=White, Dark=#252525}"
                             StrokeShape="RoundRectangle 10"
                             Padding="0">
-                        <Grid RowDefinitions="Auto,*,Auto"
-                              Padding="16"
-                              RowSpacing="10">
+                        <Grid RowDefinitions="8,Auto,*,Auto">
+
+                            <!-- Colored accent bar -->
+                            <BoxView Grid.Row="0"
+                                     Color="{Binding CardAccentColor}"
+                                     VerticalOptions="Fill" />
 
                             <!-- Repo Name -->
-                            <Label Grid.Row="0"
+                            <Label Grid.Row="1"
+                                   Margin="16,12,16,0"
                                    Text="{Binding DisplayName}"
                                    FontSize="15"
                                    FontAttributes="Bold"
                                    LineBreakMode="TailTruncation" />
 
                             <!-- Issue Count Badge -->
-                            <HorizontalStackLayout Grid.Row="1"
+                            <HorizontalStackLayout Grid.Row="2"
+                                                   Margin="16,8,16,0"
                                                    Spacing="10"
                                                    VerticalOptions="Center">
                                 <Border StrokeShape="RoundRectangle 14"
                                         Stroke="Transparent"
-                                        Background="#E53935"
+                                        BackgroundColor="{Binding CardAccentColor}"
                                         Padding="12,6">
                                     <Label Text="{Binding OpenIssues}"
                                            TextColor="White"
@@ -96,7 +182,8 @@
                             </HorizontalStackLayout>
 
                             <!-- Footer: Last Updated + Remove -->
-                            <Grid Grid.Row="2"
+                            <Grid Grid.Row="3"
+                                  Margin="16,8,16,12"
                                   ColumnDefinitions="*,Auto">
                                 <Label Grid.Column="0"
                                        Text="{Binding LastUpdatedText}"
@@ -110,7 +197,7 @@
                                         HeightRequest="28"
                                         Padding="8,0"
                                         BackgroundColor="Transparent"
-                                        TextColor="#E53935" />
+                                        TextColor="{Binding CardAccentColor}" />
                             </Grid>
                         </Grid>
                     </Border>
@@ -120,3 +207,4 @@
     </Grid>
 
 </ContentPage>
+

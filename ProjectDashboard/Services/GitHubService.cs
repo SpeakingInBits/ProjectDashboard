@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 
@@ -6,10 +7,29 @@ namespace ProjectDashboard.Services;
 public class GitHubService
 {
     private readonly HttpClient _httpClient;
+    private readonly SettingsService _settingsService;
 
-    public GitHubService(HttpClient httpClient)
+    public GitHubService(HttpClient httpClient, SettingsService settingsService)
     {
         _httpClient = httpClient;
+        _settingsService = settingsService;
+    }
+
+    private async Task<T?> GetAsync<T>(string url)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        var token = await _settingsService.GetTokenAsync();
+        if (!string.IsNullOrWhiteSpace(token))
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.StatusCode is System.Net.HttpStatusCode.Unauthorized
+                                or System.Net.HttpStatusCode.Forbidden)
+            throw new GitHubAuthException();
+
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<T>();
     }
 
     public async Task<(int openIssues, DateTime? latestCommit)> GetRepoInfoAsync(string owner, string repo)
@@ -23,14 +43,13 @@ public class GitHubService
     private async Task<int> GetOpenIssueCountAsync(string owner, string repo)
     {
         var query = Uri.EscapeDataString($"repo:{owner}/{repo} type:issue state:open");
-        var result = await _httpClient.GetFromJsonAsync<SearchResult>(
-            $"https://api.github.com/search/issues?q={query}");
+        var result = await GetAsync<SearchResult>($"https://api.github.com/search/issues?q={query}");
         return result?.TotalCount ?? 0;
     }
 
     private async Task<DateTime?> GetLatestCommitDateAsync(string owner, string repo)
     {
-        var commits = await _httpClient.GetFromJsonAsync<CommitInfo[]>(
+        var commits = await GetAsync<CommitInfo[]>(
             $"https://api.github.com/repos/{owner}/{repo}/commits?per_page=1");
         return commits?.Length > 0 ? commits[0].Commit?.Author?.Date : null;
     }

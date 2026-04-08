@@ -14,4 +14,6 @@ public class GitHubProject
     public int OpenIssues { get; set; }
 
     public string? LatestCommitDate { get; set; }
+
+    public string CardColor { get; set; } = "#4A90D9";
 }

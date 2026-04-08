@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using ProjectDashboard.Services;
 using ProjectDashboard.ViewModels;
+using ProjectDashboard.Views;
 
 namespace ProjectDashboard
 {
@@ -18,6 +19,7 @@ namespace ProjectDashboard
                 });
 
             builder.Services.AddSingleton<DatabaseService>();
+            builder.Services.AddSingleton<SettingsService>();
             builder.Services.AddSingleton(sp =>
             {
                 var client = new HttpClient();
@@ -27,7 +29,9 @@ namespace ProjectDashboard
             });
             builder.Services.AddSingleton<GitHubService>();
             builder.Services.AddTransient<DashboardViewModel>();
+            builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<SettingsPage>();
             builder.Services.AddTransient<AppShell>();
 
 #if DEBUG
