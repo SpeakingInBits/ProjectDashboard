@@ -153,17 +153,38 @@
                                      Color="{Binding CardAccentColor}"
                                      VerticalOptions="Fill" />
 
-                            <!-- Repo Name + Settings -->
+                            <!-- Repo Name + Refresh + Settings -->
                             <Grid Grid.Row="1"
                                   Margin="16,10,8,0"
-                                  ColumnDefinitions="*,Auto">
+                                  ColumnDefinitions="*,Auto,Auto">
                                 <Label Grid.Column="0"
                                        Text="{Binding DisplayName}"
                                        FontSize="15"
                                        FontAttributes="Bold"
                                        LineBreakMode="TailTruncation"
                                        VerticalOptions="Center" />
-                                <Button Grid.Column="1"
+                                <Grid Grid.Column="1"
+                                      WidthRequest="32"
+                                      HeightRequest="32"
+                                      VerticalOptions="Center">
+                                    <Button Text="⟳"
+                                            Command="{Binding RefreshCommand}"
+                                            BackgroundColor="Transparent"
+                                            TextColor="{Binding CardAccentColor}"
+                                            FontSize="16"
+                                            HeightRequest="32"
+                                            WidthRequest="32"
+                                            Padding="0"
+                                            IsVisible="{Binding IsRefreshing, Converter={StaticResource InverseBool}}" />
+                                    <ActivityIndicator IsRunning="{Binding IsRefreshing}"
+                                                       IsVisible="{Binding IsRefreshing}"
+                                                       Color="{Binding CardAccentColor}"
+                                                       HeightRequest="18"
+                                                       WidthRequest="18"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center" />
+                                </Grid>
+                                <Button Grid.Column="2"
                                         Text="⚙"
                                         Command="{Binding OpenSettingsCommand}"
                                         BackgroundColor="Transparent"

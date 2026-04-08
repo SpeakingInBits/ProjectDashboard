@@ -19,16 +19,21 @@ public partial class ProjectCardViewModel : ObservableObject
     [ObservableProperty]
     private Color cardAccentColor;
 
+    [ObservableProperty]
+    private bool isRefreshing;
+
     public IAsyncRelayCommand DeleteCommand { get; }
     public IAsyncRelayCommand OpenSettingsCommand { get; }
+    public IAsyncRelayCommand RefreshCommand { get; }
 
-    public ProjectCardViewModel(GitHubProject project, Func<ProjectCardViewModel, Task> onDelete, Func<ProjectCardViewModel, Task> onOpenSettings)
+    public ProjectCardViewModel(GitHubProject project, Func<ProjectCardViewModel, Task> onDelete, Func<ProjectCardViewModel, Task> onOpenSettings, Func<ProjectCardViewModel, Task> onRefresh)
     {
         Project = project;
         openIssues = project.OpenIssues;
         SetLastUpdatedText(project.LatestCommitDate);
         DeleteCommand = new AsyncRelayCommand(() => onDelete(this));
         OpenSettingsCommand = new AsyncRelayCommand(() => onOpenSettings(this));
+        RefreshCommand = new AsyncRelayCommand(() => onRefresh(this));
         cardAccentColor = Color.FromArgb(project.CardColor);
     }
 

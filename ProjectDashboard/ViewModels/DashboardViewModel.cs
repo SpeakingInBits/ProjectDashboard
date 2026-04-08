@@ -198,6 +198,32 @@ public partial class DashboardViewModel : ObservableObject, IRecipient<TokenUpda
         Projects.Remove(card);
     }
 
+    private async Task RefreshProjectAsync(ProjectCardViewModel card)
+    {
+        if (card.IsRefreshing) return;
+        card.IsRefreshing = true;
+        IsAuthErrorVisible = false;
+        try
+        {
+            var (issues, latestCommit) = await _gitHubService.GetRepoInfoAsync(
+                card.Project.Owner, card.Project.RepoName);
+            card.UpdateData(issues, latestCommit);
+            await _databaseService.SaveProjectAsync(card.Project);
+        }
+        catch (GitHubAuthException)
+        {
+            IsAuthErrorVisible = true;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to refresh {card.DisplayName}: {ex.Message}";
+        }
+        finally
+        {
+            card.IsRefreshing = false;
+        }
+    }
+
     private async Task OpenProjectSettingsAsync(ProjectCardViewModel card)
     {
         var page = _serviceProvider.GetRequiredService<ProjectSettingsPage>();
@@ -208,5 +234,5 @@ public partial class DashboardViewModel : ObservableObject, IRecipient<TokenUpda
     private bool CanExecuteCommands() => !IsLoading;
 
     private ProjectCardViewModel CreateCard(GitHubProject project) =>
-        new(project, DeleteProjectAsync, OpenProjectSettingsAsync);
+        new(project, DeleteProjectAsync, OpenProjectSettingsAsync, RefreshProjectAsync);
 }
