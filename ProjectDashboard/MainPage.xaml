@@ -125,7 +125,9 @@
 
         <!-- Projects Grid -->
         <CollectionView Grid.Row="4"
-                        ItemsSource="{Binding Projects}">
+                        ItemsSource="{Binding Projects}"
+                        CanReorderItems="True"
+                        ReorderCompleted="OnReorderCompleted">
             <CollectionView.EmptyView>
                 <Label Text="No projects added yet. Paste a GitHub URL above and click Add Project."
                        HorizontalOptions="Center"

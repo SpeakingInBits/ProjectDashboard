@@ -18,6 +18,13 @@ namespace ProjectDashboard
             base.OnAppearing();
             await _viewModel.LoadProjectsAsync();
         }
+
+        private async void OnReorderCompleted(object sender, EventArgs e)
+        {
+            // CollectionView has already updated the ObservableCollection;
+            // just persist the new order to SQLite.
+            await _viewModel.PersistCurrentSortOrderAsync();
+        }
     }
 }
 
