@@ -20,7 +20,9 @@ public class DatabaseService
     public async Task<List<GitHubProject>> GetProjectsAsync()
     {
         await InitAsync();
-        return await _database!.Table<GitHubProject>().ToListAsync();
+        return await _database!.Table<GitHubProject>()
+            .OrderBy(p => p.SortOrder)
+            .ToListAsync();
     }
 
     public async Task<int> SaveProjectAsync(GitHubProject project)
@@ -28,6 +30,10 @@ public class DatabaseService
         await InitAsync();
         if (project.Id != 0)
             return await _database!.UpdateAsync(project);
+
+        // Assign the next sort order position for new projects
+        var count = await _database!.Table<GitHubProject>().CountAsync();
+        project.SortOrder = count;
         return await _database!.InsertAsync(project);
     }
 
@@ -35,5 +41,12 @@ public class DatabaseService
     {
         await InitAsync();
         return await _database!.DeleteAsync(project);
+    }
+
+    public async Task SaveSortOrderAsync(IEnumerable<GitHubProject> projects)
+    {
+        await InitAsync();
+        foreach (var project in projects)
+            await _database!.UpdateAsync(project);
     }
 }

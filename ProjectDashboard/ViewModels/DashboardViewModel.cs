@@ -231,6 +231,29 @@ public partial class DashboardViewModel : ObservableObject, IRecipient<TokenUpda
         await Shell.Current.Navigation.PushModalAsync(new NavigationPage(page));
     }
 
+    public async Task ReorderProjectsAsync(int oldIndex, int newIndex)
+    {
+        if (oldIndex == newIndex) return;
+
+        var card = Projects[oldIndex];
+        Projects.Move(oldIndex, newIndex);
+
+        // Reassign sequential sort order values and persist
+        for (int i = 0; i < Projects.Count; i++)
+            Projects[i].Project.SortOrder = i;
+
+        await _databaseService.SaveSortOrderAsync(Projects.Select(c => c.Project));
+    }
+
+    // Called after CollectionView has already reordered the collection via drag-drop
+    public async Task PersistCurrentSortOrderAsync()
+    {
+        for (int i = 0; i < Projects.Count; i++)
+            Projects[i].Project.SortOrder = i;
+
+        await _databaseService.SaveSortOrderAsync(Projects.Select(c => c.Project));
+    }
+
     private bool CanExecuteCommands() => !IsLoading;
 
     private ProjectCardViewModel CreateCard(GitHubProject project) =>

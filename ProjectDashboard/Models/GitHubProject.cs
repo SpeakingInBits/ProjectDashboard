@@ -16,4 +16,6 @@ public class GitHubProject
     public string? LatestCommitDate { get; set; }
 
     public string CardColor { get; set; } = "#4A90D9";
+
+    public int SortOrder { get; set; }
 }
