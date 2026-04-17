@@ -169,6 +169,9 @@
                                        VerticalOptions="Center">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding OpenRepoCommand}" />
+                                        <PointerGestureRecognizer
+                                            PointerEntered="OnRepoLabelPointerEntered"
+                                            PointerExited="OnRepoLabelPointerExited" />
                                     </Label.GestureRecognizers>
                                 </Label>
 
