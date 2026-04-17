@@ -1,3 +1,7 @@
 <Solution>
+  <Folder Name="/Screenshots/">
+    <File Path="AppOverview.png" />
+    <File Path="README.md" />
+  </Folder>
   <Project Path="ProjectDashboard/ProjectDashboard.csproj" />
 </Solution>
