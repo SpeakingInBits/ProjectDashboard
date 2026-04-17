@@ -162,7 +162,13 @@
                                        FontSize="15"
                                        FontAttributes="Bold"
                                        LineBreakMode="TailTruncation"
-                                       VerticalOptions="Center" />
+                                       TextDecorations="Underline"
+                                       TextColor="{Binding CardAccentColor}"
+                                       VerticalOptions="Center">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenRepoCommand}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
                                 <Grid Grid.Column="1"
                                       WidthRequest="32"
                                       HeightRequest="32"

@@ -1,6 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ProjectDashboard.Models;
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Controls;
+using ProjectDashboard.Extensions;
 
 namespace ProjectDashboard.ViewModels;
 
@@ -25,6 +28,7 @@ public partial class ProjectCardViewModel : ObservableObject
     public IAsyncRelayCommand DeleteCommand { get; }
     public IAsyncRelayCommand OpenSettingsCommand { get; }
     public IAsyncRelayCommand RefreshCommand { get; }
+    public IAsyncRelayCommand OpenRepoCommand { get; }
 
     public ProjectCardViewModel(GitHubProject project, Func<ProjectCardViewModel, Task> onDelete, Func<ProjectCardViewModel, Task> onOpenSettings, Func<ProjectCardViewModel, Task> onRefresh)
     {
@@ -34,6 +38,7 @@ public partial class ProjectCardViewModel : ObservableObject
         DeleteCommand = new AsyncRelayCommand(() => onDelete(this));
         OpenSettingsCommand = new AsyncRelayCommand(() => onOpenSettings(this));
         RefreshCommand = new AsyncRelayCommand(() => onRefresh(this));
+        OpenRepoCommand = new AsyncRelayCommand(OpenRepoAsync);
         cardAccentColor = Color.FromArgb(project.CardColor);
     }
 
@@ -41,6 +46,19 @@ public partial class ProjectCardViewModel : ObservableObject
     {
         CardAccentColor = color;
         Project.CardColor = hexValue;
+    }
+
+    private async Task OpenRepoAsync()
+    {
+        try
+        {
+            var url = $"https://github.com/{Project.Owner}/{Project.RepoName}";
+            await Launcher.OpenAsync(new Uri(url));
+        }
+        catch
+        {
+            await Shell.Current.DisplayAlertAsync("Error", "Could not open browser.", "OK");
+       }
     }
 
     public void UpdateData(int issues, DateTime? latestCommit)
