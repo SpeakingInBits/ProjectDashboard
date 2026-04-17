@@ -17,7 +17,7 @@ public partial class ProjectCardViewModel : ObservableObject
     [ObservableProperty]
     private string lastUpdatedText = "Last Updated: Unknown";
 
-    public string DisplayName => $"{Project.Owner}/{Project.RepoName}";
+    public string DisplayName => Project.RepoName;
 
     [ObservableProperty]
     private Color cardAccentColor;
