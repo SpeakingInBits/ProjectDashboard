@@ -254,6 +254,20 @@ public partial class DashboardViewModel : ObservableObject, IRecipient<TokenUpda
         await _databaseService.SaveSortOrderAsync(Projects.Select(c => c.Project));
     }
 
+    [RelayCommand]
+    private async Task SortByCompletionAsync()
+    {
+        var sorted = Projects.OrderBy(c => c.IsCompleted ? 1 : 0).ToList();
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            var currentIndex = Projects.IndexOf(sorted[i]);
+            if (currentIndex != i)
+                Projects.Move(currentIndex, i);
+            sorted[i].Project.SortOrder = i;
+        }
+        await _databaseService.SaveSortOrderAsync(Projects.Select(c => c.Project));
+    }
+
     private bool CanExecuteCommands() => !IsLoading;
 
     private ProjectCardViewModel CreateCard(GitHubProject project) =>

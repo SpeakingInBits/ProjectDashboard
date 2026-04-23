@@ -25,6 +25,9 @@ public partial class ProjectCardViewModel : ObservableObject
     [ObservableProperty]
     private bool isRefreshing;
 
+    [ObservableProperty]
+    private bool isCompleted;
+
     public IAsyncRelayCommand DeleteCommand { get; }
     public IAsyncRelayCommand OpenSettingsCommand { get; }
     public IAsyncRelayCommand RefreshCommand { get; }
@@ -34,6 +37,7 @@ public partial class ProjectCardViewModel : ObservableObject
     {
         Project = project;
         openIssues = project.OpenIssues;
+        isCompleted = project.IsCompleted;
         SetLastUpdatedText(project.LatestCommitDate);
         DeleteCommand = new AsyncRelayCommand(() => onDelete(this));
         OpenSettingsCommand = new AsyncRelayCommand(() => onOpenSettings(this));
