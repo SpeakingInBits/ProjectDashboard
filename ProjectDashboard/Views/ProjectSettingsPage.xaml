@@ -90,6 +90,18 @@
                     HeightRequest="44"
                     FontSize="14" />
 
+            <!-- Project Complete Toggle -->
+            <Grid ColumnDefinitions="*,Auto"
+                  Padding="4,0">
+                <Label Grid.Column="0"
+                       Text="Mark as Completed"
+                       FontSize="15"
+                       VerticalOptions="Center" />
+                <Switch Grid.Column="1"
+                        IsToggled="{Binding IsCompleted}"
+                        VerticalOptions="Center" />
+            </Grid>
+
             <!-- Save Button -->
             <Button Text="Save"
                     Command="{Binding SaveCommand}"

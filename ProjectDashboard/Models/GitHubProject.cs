@@ -18,4 +18,6 @@ public class GitHubProject
     public string CardColor { get; set; } = "#4A90D9";
 
     public int SortOrder { get; set; }
+
+    public bool IsCompleted { get; set; }
 }

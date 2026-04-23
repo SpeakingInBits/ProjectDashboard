@@ -44,6 +44,9 @@ public partial class ProjectSettingsViewModel : ObservableObject
     [ObservableProperty]
     private string projectDisplayName = string.Empty;
 
+    [ObservableProperty]
+    private bool isCompleted;
+
     public ObservableCollection<ColorSwatchViewModel> ColorSwatches { get; } = [];
 
     public ProjectSettingsViewModel(DatabaseService databaseService)
@@ -56,6 +59,7 @@ public partial class ProjectSettingsViewModel : ObservableObject
         _card = card;
         ProjectDisplayName = card.DisplayName;
         SelectedColor = card.CardAccentColor;
+        IsCompleted = card.IsCompleted;
 
         ColorSwatches.Clear();
         foreach (var hex in ColorPalette)
@@ -90,10 +94,11 @@ public partial class ProjectSettingsViewModel : ObservableObject
 
         var selected = ColorSwatches.FirstOrDefault(s => s.IsSelected);
         if (selected is not null)
-        {
             _card.UpdateColor(selected.Color, selected.HexValue);
-            await _databaseService.SaveProjectAsync(_card.Project);
-        }
+
+        _card.IsCompleted = IsCompleted;
+        _card.Project.IsCompleted = IsCompleted;
+        await _databaseService.SaveProjectAsync(_card.Project);
 
         await Shell.Current.Navigation.PopModalAsync();
     }

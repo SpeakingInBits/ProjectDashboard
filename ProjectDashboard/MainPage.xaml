@@ -93,7 +93,7 @@
 
         <!-- Add Project Row -->
         <Grid Grid.Row="2"
-              ColumnDefinitions="*,Auto,Auto"
+              ColumnDefinitions="*,Auto,Auto,Auto"
               ColumnSpacing="8">
             <Entry Grid.Column="0"
                    Placeholder="https://github.com/owner/repo"
@@ -106,6 +106,9 @@
             <Button Grid.Column="2"
                     Text="⟳ Refresh All"
                     Command="{Binding RefreshAllCommand}" />
+            <Button Grid.Column="3"
+                    Text="✔ Sort by Status"
+                    Command="{Binding SortByCompletionCommand}" />
         </Grid>
 
         <!-- Status Row -->
@@ -238,6 +241,17 @@
                                        VerticalOptions="Center"
                                        FontSize="13"
                                        Opacity="0.75" />
+                                <Border StrokeShape="RoundRectangle 10"
+                                        Stroke="Transparent"
+                                        BackgroundColor="#27AE60"
+                                        Padding="8,4"
+                                        IsVisible="{Binding IsCompleted}"
+                                        VerticalOptions="Center">
+                                    <Label Text="Completed"
+                                           TextColor="White"
+                                           FontSize="11"
+                                           FontAttributes="Bold" />
+                                </Border>
                             </HorizontalStackLayout>
 
                             <!-- Footer: Last Updated + Remove -->
