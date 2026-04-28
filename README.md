@@ -42,3 +42,7 @@ By default, the GitHub API allows **60 requests per hour** for unauthenticated r
 | [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/) | MVVM helpers, source generators, and commands |
 | [SQLite (sqlite-net-pcl)](https://github.com/praeclarum/sqlite-net) | Local data persistence for saved projects |
 | [GitHub REST API](https://docs.github.com/en/rest) | Repository data (issues, last updated, etc.) |
+
+## Deployment
+Currently there is no official deployment. Locally you can run `dotnet publish` and pin the .exe to the start menu
+for easy access
