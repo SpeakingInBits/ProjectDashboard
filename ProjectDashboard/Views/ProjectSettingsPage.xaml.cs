@@ -13,6 +13,6 @@ public partial class ProjectSettingsPage : ContentPage
         BindingContext = viewModel;
     }
 
-    public void Initialize(ProjectCardViewModel card) =>
-        _viewModel.Initialize(card);
+    public void Initialize(ProjectCardViewModel card, Func<ProjectCardViewModel, Task> onDeleteFromGitHub) =>
+        _viewModel.Initialize(card, onDeleteFromGitHub);
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:ProjectDashboard.ViewModels"
@@ -12,57 +12,252 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="32,24"
-                             Spacing="16"
-                             MaximumWidthRequest="580"
+                             Spacing="20"
+                             MaximumWidthRequest="600"
                              HorizontalOptions="Center">
 
-            <Label Text="Personal Access Token"
+            <!-- ══ DEFAULT TOKEN ══════════════════════════════════════════════ -->
+            <Label Text="Default Token"
                    FontSize="20"
                    FontAttributes="Bold" />
 
             <Label FontSize="13"
-                   Opacity="0.75">
-                <Label.FormattedText>
-                    <FormattedString>
-                        <Span Text="A token raises the API rate limit from 60 to 5,000 requests/hour and allows access to private repositories. " />
-                        <Span Text="Generate one at github.com/settings/tokens" TextColor="#4A90D9" />
-                        <Span Text=" — grant the " />
-                        <Span Text="repo" FontAttributes="Bold" />
-                        <Span Text=" scope for private repos, or no scopes for public repos only." />
-                    </FormattedString>
-                </Label.FormattedText>
-            </Label>
+                   Opacity="0.75"
+                   Text="Used as a fallback when no owner-specific token matches. Raises the rate limit to 5,000 req/hr for all requests." />
 
-            <!-- Token Entry Row -->
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                 <Entry Grid.Column="0"
                        Placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                       Text="{Binding Token}"
-                       IsPassword="{Binding IsPasswordHidden}" />
+                       Text="{Binding GlobalToken}"
+                       IsPassword="{Binding IsGlobalPasswordHidden}" />
                 <Button Grid.Column="1"
-                        Text="{Binding ShowToken, Converter={StaticResource BoolToShowHideConverter}}"
-                        Command="{Binding ToggleShowTokenCommand}"
+                        Text="{Binding ShowGlobalToken, Converter={StaticResource BoolToShowHideConverter}}"
+                        Command="{Binding ToggleShowGlobalTokenCommand}"
                         MinimumWidthRequest="70"
                         BackgroundColor="Transparent"
                         TextColor="{AppThemeBinding Light=#555, Dark=#AAA}" />
             </Grid>
 
-            <!-- Action Buttons -->
             <HorizontalStackLayout Spacing="8">
-                <Button Text="Save Token"
-                        Command="{Binding SaveCommand}"
-                        MinimumWidthRequest="130" />
-                <Button Text="Clear Token"
-                        Command="{Binding ClearCommand}"
+                <Button Text="Save Default Token"
+                        Command="{Binding SaveGlobalCommand}"
+                        MinimumWidthRequest="160" />
+                <Button Text="Clear"
+                        Command="{Binding ClearGlobalCommand}"
                         BackgroundColor="Transparent"
                         TextColor="#E53935"
-                        MinimumWidthRequest="130" />
+                        MinimumWidthRequest="80" />
             </HorizontalStackLayout>
+
+            <BoxView HeightRequest="1"
+                     Color="{AppThemeBinding Light=#E0E0E0, Dark=#444}"
+                     Margin="0,4" />
+
+            <!-- ══ PER-OWNER TOKENS ═══════════════════════════════════════════ -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0"
+                       Text="Owner / Org Tokens"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center" />
+                <Button Grid.Column="1"
+                        Text="+ Add Token"
+                        Command="{Binding ShowAddFormCommand}"
+                        IsVisible="{Binding IsAddFormVisible, Converter={StaticResource InverseBool}}"
+                        MinimumWidthRequest="110" />
+            </Grid>
+
+            <Label FontSize="13"
+                   Opacity="0.75"
+                   Text="Add a token scoped to a specific GitHub user or org. This token takes priority over the default token for that owner." />
+
+            <!-- Add-token form -->
+            <Border IsVisible="{Binding IsAddFormVisible}"
+                    Stroke="{AppThemeBinding Light=#4A90D9, Dark=#4A90D9}"
+                    StrokeThickness="1"
+                    Padding="16,14">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Add Owner Token"
+                           FontAttributes="Bold"
+                           FontSize="14" />
+                    <Entry Placeholder="GitHub username or org name  (e.g. octocat)"
+                           Text="{Binding NewOwner}" />
+                    <Entry Placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                           Text="{Binding NewToken}"
+                           IsPassword="True" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Add"
+                                Command="{Binding AddOwnerTokenCommand}"
+                                MinimumWidthRequest="90" />
+                        <Button Text="Cancel"
+                                Command="{Binding HideAddFormCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{AppThemeBinding Light=#555, Dark=#AAA}"
+                                MinimumWidthRequest="90" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Owner token rows -->
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding OwnerTokens}"
+                                 Spacing="8">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:OwnerTokenViewModel">
+                        <Border Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444}"
+                                StrokeThickness="1"
+                                Padding="14,10">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+
+                            <VerticalStackLayout Spacing="8">
+
+                                <!-- View mode -->
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                                      ColumnSpacing="10"
+                                      IsVisible="{Binding IsEditing, Converter={StaticResource InverseBool}}">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding Owner}"
+                                           FontAttributes="Bold"
+                                           FontSize="14"
+                                           VerticalOptions="Center" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding MaskedToken}"
+                                           FontSize="12"
+                                           Opacity="0.6"
+                                           FontFamily="OpenSans-Regular"
+                                           VerticalOptions="Center" />
+                                    <Button Grid.Column="2"
+                                            Text="Edit"
+                                            Command="{Binding EditCommand}"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#4A90D9"
+                                            MinimumWidthRequest="50"
+                                            Padding="4,0" />
+                                    <Button Grid.Column="3"
+                                            Text="Remove"
+                                            Command="{Binding DeleteCommand}"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#E53935"
+                                            MinimumWidthRequest="70"
+                                            Padding="4,0" />
+                                </Grid>
+
+                                <!-- Edit mode -->
+                                <VerticalStackLayout Spacing="8"
+                                                     IsVisible="{Binding IsEditing}">
+                                    <Label Text="{Binding Owner}"
+                                           FontAttributes="Bold"
+                                           FontSize="14" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Entry Grid.Column="0"
+                                               Text="{Binding Token}"
+                                               IsPassword="{Binding IsPasswordHidden}"
+                                               Placeholder="New token value" />
+                                        <Button Grid.Column="1"
+                                                Text="{Binding ShowToken, Converter={StaticResource BoolToShowHideConverter}}"
+                                                Command="{Binding ToggleShowTokenCommand}"
+                                                BackgroundColor="Transparent"
+                                                TextColor="{AppThemeBinding Light=#555, Dark=#AAA}"
+                                                MinimumWidthRequest="70" />
+                                    </Grid>
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Button Text="Save"
+                                                Command="{Binding SaveCommand}"
+                                                MinimumWidthRequest="90" />
+                                        <Button Text="Cancel"
+                                                Command="{Binding CancelEditCommand}"
+                                                BackgroundColor="Transparent"
+                                                TextColor="{AppThemeBinding Light=#555, Dark=#AAA}"
+                                                MinimumWidthRequest="90" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <Label Text="No owner tokens configured."
+                   FontSize="13"
+                   Opacity="0.5"
+                   HorizontalOptions="Center"
+                   IsVisible="{Binding OwnerTokens.Count, Converter={StaticResource InverseBool}}" />
+
+            <BoxView HeightRequest="1"
+                     Color="{AppThemeBinding Light=#E0E0E0, Dark=#444}"
+                     Margin="0,4" />
+
+            <!-- ══ REQUIRED PERMISSIONS ════════════════════════════════════════ -->
+            <Label Text="Required Permissions"
+                   FontSize="16"
+                   FontAttributes="Bold" />
+
+            <Border Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444}"
+                    StrokeThickness="1"
+                    BackgroundColor="{AppThemeBinding Light=#F9F9F9, Dark=#2A2A2A}"
+                    Padding="16,12">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="10">
+
+                    <Label FontSize="12" FontAttributes="Bold" Opacity="0.6"
+                           Text="CLASSIC PAT  (Tokens classic)" />
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto"
+                          ColumnSpacing="12" RowSpacing="4">
+                        <Label Grid.Row="0" Grid.Column="0" Text="(no scopes)" FontSize="12" FontAttributes="Bold" TextColor="#4A90D9" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="Public repositories only" FontSize="12" Opacity="0.75" VerticalOptions="Center" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="repo" FontSize="12" FontAttributes="Bold" TextColor="#4A90D9" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="Read private repos, issues &amp; commits" FontSize="12" Opacity="0.75" VerticalOptions="Center" />
+                        <Label Grid.Row="2" Grid.Column="0" Text="delete_repo" FontSize="12" FontAttributes="Bold" TextColor="#4A90D9" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="Delete repositories from within the app" FontSize="12" Opacity="0.75" VerticalOptions="Center" />
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#E0E0E0, Dark=#444}" Margin="0,2" />
+
+                    <Label Text="FINE-GRAINED PAT  (Fine-grained tokens)"
+                           FontSize="12" FontAttributes="Bold" Opacity="0.6" />
+
+                    <Grid ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto,Auto,Auto"
+                          ColumnSpacing="12" RowSpacing="4">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Metadata" FontSize="12" FontAttributes="Bold" TextColor="#4A90D9" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="Read-only" FontSize="12" Opacity="0.55" VerticalOptions="Center" />
+                        <Label Grid.Row="0" Grid.Column="2" Text="Always required" FontSize="12" Opacity="0.75" VerticalOptions="Center" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="Contents" FontSize="12" FontAttributes="Bold" TextColor="#4A90D9" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="Read-only" FontSize="12" Opacity="0.55" VerticalOptions="Center" />
+                        <Label Grid.Row="1" Grid.Column="2" Text="Read commits (private repos)" FontSize="12" Opacity="0.75" VerticalOptions="Center" />
+                        <Label Grid.Row="2" Grid.Column="0" Text="Issues" FontSize="12" FontAttributes="Bold" TextColor="#4A90D9" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="Read-only" FontSize="12" Opacity="0.55" VerticalOptions="Center" />
+                        <Label Grid.Row="2" Grid.Column="2" Text="Read open issue counts (private repos)" FontSize="12" Opacity="0.75" VerticalOptions="Center" />
+                        <Label Grid.Row="3" Grid.Column="0" Text="Administration" FontSize="12" FontAttributes="Bold" TextColor="#4A90D9" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="Read &amp; write" FontSize="12" Opacity="0.55" VerticalOptions="Center" />
+                        <Label Grid.Row="3" Grid.Column="2" Text="Delete repositories from within the app" FontSize="12" Opacity="0.75" VerticalOptions="Center" />
+                    </Grid>
+
+                    <Label FontSize="11" Opacity="0.55">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="⚠ Fine-grained PATs must set Repository access to " />
+                                <Span Text="All repositories" FontAttributes="Italic" />
+                                <Span Text=" to include private repos." />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+
+                </VerticalStackLayout>
+            </Border>
 
             <!-- Status feedback -->
             <Label Text="{Binding StatusMessage}"
                    TextColor="#2ECC71"
                    FontSize="13"
+                   HorizontalOptions="Center"
                    IsVisible="{Binding IsStatusVisible}" />
 
         </VerticalStackLayout>

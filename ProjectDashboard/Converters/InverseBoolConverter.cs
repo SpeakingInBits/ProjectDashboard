@@ -5,7 +5,10 @@ namespace ProjectDashboard.Converters;
 public class InverseBoolConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => value is not true;
+    {
+        if (value is int count) return count == 0;
+        return value is not true;
+    }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is not true;

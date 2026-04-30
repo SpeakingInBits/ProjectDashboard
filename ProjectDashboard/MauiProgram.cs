@@ -34,6 +34,7 @@ namespace ProjectDashboard
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<SettingsPage>();
             builder.Services.AddTransient<ProjectSettingsPage>();
+            builder.Services.AddTransient<DeleteFromGitHubPage>();
             builder.Services.AddTransient<AppShell>();
 
 #if DEBUG

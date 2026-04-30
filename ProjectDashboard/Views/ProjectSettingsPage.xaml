@@ -112,6 +112,32 @@
                     FontSize="15"
                     FontAttributes="Bold" />
 
+            <!-- Danger Zone -->
+            <Border StrokeShape="RoundRectangle 8"
+                    Background="{AppThemeBinding Light=#FFEBEE, Dark=#2C0000}"
+                    Stroke="#B71C1C"
+                    StrokeThickness="1"
+                    Padding="16,14"
+                    Margin="0,16,0,0">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="⚠  Danger Zone"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="#B71C1C" />
+                    <Label Text="Permanently delete this repository from GitHub. This action cannot be undone."
+                           FontSize="13"
+                           Opacity="0.8" />
+                    <Button Text="Delete Repository from GitHub…"
+                            Command="{Binding DeleteFromGitHubCommand}"
+                            BackgroundColor="#B71C1C"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="44"
+                            FontSize="14"
+                            FontAttributes="Bold" />
+                </VerticalStackLayout>
+            </Border>
+
         </VerticalStackLayout>
     </ScrollView>
 

@@ -37,6 +37,7 @@ public partial class ProjectSettingsViewModel : ObservableObject
 
     private readonly DatabaseService _databaseService;
     private ProjectCardViewModel? _card;
+    private Func<ProjectCardViewModel, Task>? _onDeleteFromGitHub;
 
     [ObservableProperty]
     private Color selectedColor = Colors.Transparent;
@@ -54,9 +55,10 @@ public partial class ProjectSettingsViewModel : ObservableObject
         _databaseService = databaseService;
     }
 
-    public void Initialize(ProjectCardViewModel card)
+    public void Initialize(ProjectCardViewModel card, Func<ProjectCardViewModel, Task> onDeleteFromGitHub)
     {
         _card = card;
+        _onDeleteFromGitHub = onDeleteFromGitHub;
         ProjectDisplayName = card.DisplayName;
         SelectedColor = card.CardAccentColor;
         IsCompleted = card.IsCompleted;
@@ -106,4 +108,11 @@ public partial class ProjectSettingsViewModel : ObservableObject
     [RelayCommand]
     private static async Task CloseAsync() =>
         await Shell.Current.Navigation.PopModalAsync();
+
+    [RelayCommand]
+    private async Task DeleteFromGitHubAsync()
+    {
+        if (_card is null || _onDeleteFromGitHub is null) return;
+        await _onDeleteFromGitHub(_card);
+    }
 }

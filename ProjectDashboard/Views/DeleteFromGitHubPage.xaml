@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProjectDashboard.Views.DeleteFromGitHubPage"
+             Title="Delete Repository"
+             Shell.PresentationMode="ModalAnimated">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Cancel" Clicked="OnCancelClicked" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="32,32"
+                             Spacing="24"
+                             MaximumWidthRequest="520"
+                             HorizontalOptions="Center">
+
+            <!-- Warning Icon -->
+            <Label Text="⚠️"
+                   FontSize="64"
+                   HorizontalOptions="Center" />
+
+            <!-- Heading -->
+            <Label Text="Delete Repository from GitHub?"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Repo name pill -->
+            <Border StrokeShape="RoundRectangle 8"
+                    BackgroundColor="#B71C1C"
+                    Stroke="Transparent"
+                    Padding="16,10"
+                    HorizontalOptions="Center">
+                <Label x:Name="RepoNameLabel"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center" />
+            </Border>
+
+            <!-- Warning text -->
+            <Border StrokeShape="RoundRectangle 8"
+                    Background="{AppThemeBinding Light=#FFEBEE, Dark=#2C0000}"
+                    Stroke="{AppThemeBinding Light=#EF9A9A, Dark=#5C0000}"
+                    StrokeThickness="1"
+                    Padding="16,12">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="This action is PERMANENT and CANNOT be undone."
+                           FontAttributes="Bold"
+                           TextColor="#B71C1C"
+                           FontSize="14" />
+                    <Label FontSize="13"
+                           Opacity="0.85">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Deleting this repository will permanently remove:" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Label Text="  • All code, commits, and branches"
+                           FontSize="13"
+                           Opacity="0.85" />
+                    <Label Text="  • All issues, pull requests, and comments"
+                           FontSize="13"
+                           Opacity="0.85" />
+                    <Label Text="  • All releases, wikis, and project boards"
+                           FontSize="13"
+                           Opacity="0.85" />
+                    <Label Text="  • All collaborator access and settings"
+                           FontSize="13"
+                           Opacity="0.85" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Confirmation entry -->
+            <VerticalStackLayout Spacing="8">
+                <Label x:Name="ConfirmPromptLabel"
+                       FontSize="13"
+                       Opacity="0.8" />
+                <Entry x:Name="ConfirmEntry"
+                       Placeholder="Type repository name to confirm"
+                       TextChanged="OnConfirmEntryTextChanged" />
+            </VerticalStackLayout>
+
+            <!-- Delete button -->
+            <Button x:Name="DeleteButton"
+                    Text="I understand, permanently delete this repository"
+                    BackgroundColor="#B71C1C"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    FontSize="14"
+                    IsEnabled="False"
+                    HeightRequest="52"
+                    CornerRadius="8"
+                    Clicked="OnDeleteClicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
