@@ -93,10 +93,10 @@
 
         <!-- Add Project Row -->
         <Grid Grid.Row="2"
-              ColumnDefinitions="*,Auto,Auto,Auto"
+              ColumnDefinitions="*,Auto,Auto,Auto,Auto"
               ColumnSpacing="8">
             <Entry Grid.Column="0"
-                   Placeholder="https://github.com/owner/repo"
+                   Placeholder="https://github.com/owner/repo  or  owner"
                    Text="{Binding NewProjectUrl}"
                    ReturnCommand="{Binding AddProjectCommand}"
                    VerticalOptions="Center" />
@@ -104,9 +104,13 @@
                     Text="Add Project"
                     Command="{Binding AddProjectCommand}" />
             <Button Grid.Column="2"
+                    Text="Add Owner's Repos"
+                    Command="{Binding AddOwnerProjectsCommand}"
+                    ToolTipProperties.Text="Fetch all repositories from a GitHub user or org (include private repos by adding a token in Settings)" />
+            <Button Grid.Column="3"
                     Text="⟳ Refresh All"
                     Command="{Binding RefreshAllCommand}" />
-            <Button Grid.Column="3"
+            <Button Grid.Column="4"
                     Text="✔ Sort by Status"
                     Command="{Binding SortByCompletionCommand}" />
         </Grid>

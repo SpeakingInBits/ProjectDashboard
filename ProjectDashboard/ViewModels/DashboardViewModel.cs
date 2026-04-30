@@ -162,6 +162,86 @@ public partial class DashboardViewModel : ObservableObject, IRecipient<TokenUpda
     }
 
     [RelayCommand(CanExecute = nameof(CanExecuteCommands))]
+    private async Task AddOwnerProjectsAsync()
+    {
+        ErrorMessage = null;
+        var input = NewProjectUrl.Trim();
+
+        if (!GitHubService.TryParseOwnerUrl(input, out var owner))
+        {
+            ErrorMessage = "Invalid owner URL. Use https://github.com/owner or just the username.";
+            return;
+        }
+
+        IsLoading = true;
+        IsAuthErrorVisible = false;
+        try
+        {
+            var repos = await _gitHubService.GetOwnerReposAsync(owner);
+
+            var added = 0;
+            var skipped = 0;
+
+            foreach (var repo in repos)
+            {
+                var repoOwner = repo.Owner?.Login ?? owner;
+                var repoName = repo.Name;
+
+                if (Projects.Any(p =>
+                        p.Project.Owner.Equals(repoOwner, StringComparison.OrdinalIgnoreCase) &&
+                        p.Project.RepoName.Equals(repoName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                try
+                {
+                    var (issues, latestCommit) = await _gitHubService.GetRepoInfoAsync(repoOwner, repoName);
+                    var project = new GitHubProject
+                    {
+                        Owner = repoOwner,
+                        RepoName = repoName,
+                        OpenIssues = issues,
+                        LatestCommitDate = latestCommit?.ToString("O"),
+                        CardColor = CardColorPalette[Projects.Count % CardColorPalette.Length]
+                    };
+                    await _databaseService.SaveProjectAsync(project);
+                    Projects.Add(CreateCard(project));
+                    added++;
+                }
+                catch (GitHubAuthException)
+                {
+                    IsAuthErrorVisible = true;
+                    break;
+                }
+                catch { /* skip repos that fail individually */ }
+            }
+
+            NewProjectUrl = string.Empty;
+
+            if (added == 0 && skipped == 0)
+                ErrorMessage = $"No repositories found for owner '{owner}'.";
+            else if (added == 0)
+                ErrorMessage = $"All {skipped} repositories for '{owner}' are already on your dashboard.";
+            else if (skipped > 0)
+                ErrorMessage = $"Added {added} repositories. Skipped {skipped} already present.";
+        }
+        catch (GitHubAuthException)
+        {
+            IsAuthErrorVisible = true;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to fetch repositories: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanExecuteCommands))]
     private async Task RefreshAllAsync()
     {
         ErrorMessage = null;
@@ -198,6 +278,53 @@ public partial class DashboardViewModel : ObservableObject, IRecipient<TokenUpda
         Projects.Remove(card);
     }
 
+    private async Task DeleteProjectFromGitHubAsync(ProjectCardViewModel card)
+    {
+        var page = new DeleteFromGitHubPage();
+        page.Initialize(card.Project.Owner, card.Project.RepoName);
+        await Shell.Current.Navigation.PushModalAsync(new NavigationPage(page));
+        var confirmed = await page.Result;
+        if (!confirmed) return;
+
+        IsLoading = true;
+        try
+        {
+            await _gitHubService.DeleteRepositoryAsync(card.Project.Owner, card.Project.RepoName);
+            await _databaseService.DeleteProjectAsync(card.Project);
+            Projects.Remove(card);
+
+            // Dismiss the ProjectSettingsPage that is still open underneath
+            await Shell.Current.Navigation.PopModalAsync();
+        }
+        catch (GitHubAuthException)
+        {
+            await Shell.Current.DisplayAlert(
+                "Authentication Error",
+                "Your token is missing the 'delete_repo' scope (Classic PAT) or 'Administration: Read & write' permission (Fine-grained PAT). Update your token in Settings.",
+                "OK");
+        }
+        catch (HttpRequestException ex)
+        {
+            var message = ex.StatusCode switch
+            {
+                System.Net.HttpStatusCode.NotFound =>
+                    $"'{card.Project.Owner}/{card.Project.RepoName}' was not found on GitHub. It may have already been deleted.",
+                System.Net.HttpStatusCode.Forbidden =>
+                    "Your token does not have permission to delete this repository. Check the 'delete_repo' scope in Settings.",
+                _ => $"GitHub returned an error: {(int?)ex.StatusCode} {ex.Message}"
+            };
+            await Shell.Current.DisplayAlert("Delete Failed", message, "OK");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Delete Failed", ex.Message, "OK");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
     private async Task RefreshProjectAsync(ProjectCardViewModel card)
     {
         if (card.IsRefreshing) return;
@@ -227,7 +354,7 @@ public partial class DashboardViewModel : ObservableObject, IRecipient<TokenUpda
     private async Task OpenProjectSettingsAsync(ProjectCardViewModel card)
     {
         var page = _serviceProvider.GetRequiredService<ProjectSettingsPage>();
-        page.Initialize(card);
+        page.Initialize(card, DeleteProjectFromGitHubAsync);
         await Shell.Current.Navigation.PushModalAsync(new NavigationPage(page));
     }
 
